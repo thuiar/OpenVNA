@@ -5,23 +5,28 @@ import os
 import random
 import shutil
 from pathlib import Path
-from modal_api.utils.real_noise import real_noise
+from model_api.utils.real_noise import real_noise
 # import transformers
 from flask import Flask, request
 from flask_cors import CORS
-from MMSA import MMSA_test
 from MSA_FET import FeatureExtractionTool, get_default_config
 from transformers import BertTokenizerFast
 
 from config import *
 from utils import *
-from modal_api import run
+from model_api.trains import MMIN_MODEL
+from model_api.run import AMIO_MODEL
 
 os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 app = Flask(__name__)
 app.config.from_object(APP_SETTINGS)
+app.config['mmin'] = MMIN_MODEL()
+app.config['tpfn'] = AMIO_MODEL('tpfn')
+app.config['t2fn'] = AMIO_MODEL('t2fn')
+app.config['tfr_net'] = AMIO_MODEL('tfr_net')
+
 CORS(app, supports_credentials=True)
 
 logger = logging.getLogger()
@@ -108,7 +113,6 @@ def upload_transcript():
         return {"code": ERROR_CODE, "msg": str(e)}
     return {"code": SUCCESS_CODE, "msg": "success", "align": aligned_results}
 
-
 @app.route('/videoEditAligned', methods=['POST'])
 def edit_video_aligned():
     logger.info("API called: /videoEditAligned")
@@ -122,7 +126,6 @@ def edit_video_aligned():
         video_edit_file = MEDIA_PATH / video_id / "edit_video.json"
         audio_edit_file = MEDIA_PATH / video_id / "edit_audio.json"
         
-        shutil.copyfile(raw_video_path, modified_video_path)
         with open(MEDIA_PATH / video_id / "aligned_results.json") as f:
             aligned_results = json.load(f)
         # re-organize
@@ -135,6 +138,9 @@ def edit_video_aligned():
                 video_modify['v_end'].append(float(word[0][1]))
                 video_modify['v_option'].append(word[3])
             elif word[1] == 'a':
+                if word[2] == 'mute':
+                    word[2] = 'volume'
+                    word[3] = 0
                 audio_modify['a_mode'].append(word[2])
                 audio_modify['a_start'].append(float(word[0][0]))
                 audio_modify['a_end'].append(float(word[0][1]))
@@ -161,6 +167,9 @@ def edit_video_aligned():
                 a_end=audio_modify['a_end'],
                 a_option=audio_modify['a_option']
             )
+        else:
+            shutil.copyfile(raw_video_path, modified_video_path)
+
         if len(audio_modify['a_mode']) and asrNosie:
             # extract audio
             audio_save_path = Path(MEDIA_PATH) / video_id / "audio.wav"
@@ -179,14 +188,15 @@ def edit_video_aligned():
             logger.info(f"Running alignment for {video_id}...")
             aligned_results = do_alignment(audio_save_path, transcript)
             logger.info("Alignment done.")
-
-        # edit text
-        for t in text_modify:
-            word_id = t[0][2]
-            if t[1] == 'replace':
-                aligned_results[word_id]['text'] = t[2]
-            elif t[1] == 'remove':
-                aligned_results[word_id]['text'] = 'REMOVED'  # [UNK]
+        else:
+            # edit text
+            for t in text_modify:
+                word_id = t[0][2]
+                if t[1] == 'replace':
+                    aligned_results[word_id]['text'] = t[2]
+                elif t[1] == 'remove':
+                    aligned_results[word_id]['text'] = 'REMOVED'  # [UNK]
+        
         transcript = " ".join([w['text'] for w in aligned_results])
         with open(MEDIA_PATH / video_id / "transcript_modified.txt", 'w') as f:
             f.write(transcript)
@@ -393,9 +403,8 @@ def run_msa_aligned():
         if data_defended or feature_defended:
             res["defended"] = {}
 
-        bert_fet = FeatureExtractionTool("bert")
-        audio_fet = FeatureExtractionTool("opensmile")
-        vision_fet = FeatureExtractionTool("openface")
+        audio_fet = FeatureExtractionTool(config="model_api/config/opensmile.json")
+        vision_fet = FeatureExtractionTool(config="model_api/config/openface.json")
 
         with open(feat_defended_path, "rb") as f:
             original_bert = pickle.load(f)
@@ -429,13 +438,19 @@ def run_msa_aligned():
             defended_feature = pad_or_truncate(defended_feature)
 
         for m in models:
-            r = run.single(m, original_feature)
-            res["original"][m] = float(r)
-            r = run.single(m, modified_feature)
-            res["modified"][m] = float(r)
             if data_defended or feature_defended:
-                r = run.single(m, defended_feature)
-                res["defended"][m] = float(r)
+                for key in original_feature:
+                    original_feature[key] = np.concatenate((original_feature[key], modified_feature[key], defended_feature[key]), axis=0)
+                r = app.config[str.lower(m)].eval(original_feature)
+                res["original"][m] = float(r[0])
+                res["modified"][m] = float(r[1])
+                res["defended"][m] = float(r[2])
+            else:
+                for key in original_feature:
+                    original_feature[key] = np.concatenate((original_feature[key], modified_feature[key]), axis=0)
+                r = app.config[str.lower(m)].eval(original_feature)
+                res["original"][m] = float(r[0])
+                res["modified"][m] = float(r[1])
 
     except Exception as e:
         logger.exception(e)

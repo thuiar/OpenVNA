@@ -30,6 +30,25 @@
             />
           </el-form-item>
           <el-form-item label="Type">
+            <template #label>
+              <span>Type</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    Supported modes: "volume", "coloran", "background",
+                    "sudden", "lowpass", "reverb"
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
+
             <el-select
               v-model="a_form_item.type"
               class="oneInput"
@@ -50,8 +69,24 @@
               a_form_item.type == 'sudden' ||
               a_form_item.type == 'reverb'
             "
-            label="Option"
           >
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-select
               v-model="a_form_item.option[a_form_item.type][0]"
               class="halfSelect"
@@ -72,7 +107,24 @@
               type="text"
             />
           </el-form-item>
-          <el-form-item v-if="a_form_item.type == 'volume'" label="Volume">
+          <el-form-item v-if="a_form_item.type == 'volume'">
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="a_form_item.option[a_form_item.type]"
               placeholder="0 to 1"
@@ -81,6 +133,23 @@
             />
           </el-form-item>
           <el-form-item v-if="a_form_item.type == 'lowpass'" label="Lowpass">
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="a_form_item.option[a_form_item.type]"
               placeholder="eg. 500"
@@ -121,7 +190,26 @@
               type="text"
             />
           </el-form-item>
-          <el-form-item label="Type">
+          <el-form-item>
+            <template #label>
+              <span>Type</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    Supported modes: "blank", "avgblur", "gblur",
+                    "impulse_value", "occlusion", "color",
+                    "color_channel_swapping", "color_inversion".
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-select
               v-model="v_form_item.type"
               placeholder="please select your zone"
@@ -139,8 +227,24 @@
             v-if="
               v_form_item.type == 'impulse_value' || v_form_item.type == 'gblur'
             "
-            label="Option"
           >
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="v_form_item.option.value"
               placeholder="> 0"
@@ -148,7 +252,24 @@
               class="oneInput"
             />
           </el-form-item>
-          <el-form-item v-if="v_form_item.type == 'avgblur'" label="Option">
+          <el-form-item v-if="v_form_item.type == 'avgblur'">
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="v_form_item.option.avgblur[0]"
               placeholder="sizeX"
@@ -162,7 +283,24 @@
               class="optionHalfInput"
             />
           </el-form-item>
-          <el-form-item v-if="v_form_item.type == 'color'" label="Option">
+          <el-form-item v-if="v_form_item.type == 'color'">
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="v_form_item.option.color[0]"
               placeholder="con..."
@@ -205,7 +343,24 @@
               class="optionThirdInput"
             />
           </el-form-item>
-          <el-form-item v-if="v_form_item.type == 'occlusion'" label="Option">
+          <el-form-item v-if="v_form_item.type == 'occlusion'">
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-input
               v-model="v_form_item.option.occlusion[0]"
               placeholder="x"
@@ -235,8 +390,24 @@
           </el-form-item>
           <el-form-item
             v-if="v_form_item.type == 'color_channel_swapping'"
-            label="Option"
           >
+          <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
             <el-select
               v-model="v_form_item.option.color_channel_swapping[0]"
               class="optionHalfInput"
@@ -282,8 +453,9 @@
 </template>
   
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { ElMessage } from "element-plus";
+import OperationMethod from "../utils/operation.js";
 const selectModality = ref("audio");
 const a_form_item = ref({
   type: "",
@@ -369,6 +541,13 @@ const options_details = ref({
   },
 });
 const emit = defineEmits(["addNoise"]);
+const boxItemTip = computed(() => {
+  let from_item_type =
+    selectModality.value == "audio"
+      ? a_form_item.value.type
+      : v_form_item.value.type;
+  return OperationMethod.noiseTip(from_item_type);
+});
 const addNoiseItem = () => {
   let nosieItem = [, , ,];
   if (selectModality.value == "audio") {
@@ -486,7 +665,7 @@ const addNoiseItem = () => {
       coloran: [,],
       mute: "",
     },
-  }
+  };
   v_form_item.value = {
     type: "",
     start: "",
@@ -536,5 +715,13 @@ const addNoiseItem = () => {
 }
 .oneInput {
   width: 210px;
+}
+.boxItemTip {
+  width: 200px;
+}
+.questionFilled {
+  color: #bbbbbb;
+  height: 33px;
+  margin-left: 5px;
 }
 </style>

@@ -1,9 +1,8 @@
 from pathlib import Path
-import torch
 
 WEB_SERVER_PORT = 4096
-LOG_FILE_PATH = Path("/home/zhangbaozheng/emotional/Robust-MSA/logs/Robust-MSA.log")
-MEDIA_PATH = Path("/home/zhangbaozheng/emotional/Robust-MSA/media")
+LOG_FILE_PATH = Path("logs/Robust-MSA.log")
+MEDIA_PATH = Path("media")
 MEDIA_SERVER_PORT = 8192
 # DEVICE = torch.device("cuda")
 DEVICE = "cuda"

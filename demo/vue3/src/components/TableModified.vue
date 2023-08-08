@@ -6,10 +6,10 @@
     </div>
     <el-table :data="tableData" border stripe class="table_details">
       <el-table-column prop="index" label="Index" width="70" />
-      <el-table-column prop="modality" label="Modality" width="100" />
-      <el-table-column prop="start" label="Start time" width="100" />
-      <el-table-column prop="end" label="End time" width="100" />
-      <el-table-column prop="type" label="Noise type" width="140" />
+      <el-table-column prop="modality" label="Modality" width="90" />
+      <el-table-column prop="start" label="Start time" width="95" />
+      <el-table-column prop="end" label="End time" width="95" />
+      <el-table-column prop="type" label="Noise type" width="160" />
       <el-table-column prop="option" label="Noise details" width="200" />
       <el-table-column fixed="right" v-if="!onlyDisplay" label="Operate">
         <template #default="scope">

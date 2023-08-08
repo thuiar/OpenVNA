@@ -1,25 +1,25 @@
 <template>
   <div>
-    <div class="selectMethod">
+    <div class="selectMethod" v-if="!disabled">
       <div class="methodTitle">Methods</div>
       <div class="description">Please select at least one model!</div>
     </div>
     <div class="checkboxContainer">
       <div class="checkboxTitle">Data Level Defence:</div>
-      <el-checkbox-group class="checkboxGroup" v-model="dataDefense" @change="selectMethod">
+      <el-checkbox-group class="checkboxGroup" v-model="dataDefense" :disabled="disabled" @change="selectMethod">
         <el-checkbox label="Audio Denoising" />
         <el-checkbox label="Video MCI (time-consuming)" />
       </el-checkbox-group>
     </div>
     <div class="checkboxContainer">
       <div class="checkboxTitle">Feature Level Defence:</div>
-      <el-checkbox-group class="checkboxGroup" v-model="featureDefense" @change="selectMethod">
+      <el-checkbox-group class="checkboxGroup" v-model="featureDefense" :disabled="disabled" @change="selectMethod">
         <el-checkbox label="Feature Interpolation" />
       </el-checkbox-group>
     </div>
     <div class="checkboxContainer">
       <div class="checkboxTitle">MSA Models:</div>
-      <el-checkbox-group class="checkboxGroup" v-model="msaModel" @change="selectMethod">
+      <el-checkbox-group class="checkboxGroup" v-model="msaModel" :disabled="disabled" @change="selectMethod">
         <el-checkbox label="MMIN" />
         <el-checkbox label="TFR-Net" />
         <el-checkbox label="T2FN" />
@@ -31,9 +31,12 @@
 
 <script setup>
 import { ref } from "vue";
-const dataDefense = ref([]);
+const dataDefense = ref(['Video MCI (time-consuming)','Audio Denoising']);
 const featureDefense = ref([]);
 const msaModel = ref(["MMIN","TFR-Net","T2FN","TPFN"]);
+const props = defineProps({
+  disabled: Boolean
+});
 const emit = defineEmits(["transmitMethods"]);
 const selectMethod = () => {
   let msaList = [];

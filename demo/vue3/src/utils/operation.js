@@ -55,6 +55,56 @@ const _timeInterval = (pxPerSec) => {
   }
   return retval;
 };
+const noiseTip = (from_item_type) => {
+  let result
+  if (from_item_type == "lowpass") {
+    result = "Frequency of low pass filter, given in Hz.";
+  } else if (from_item_type == "volume") {
+    result = "Volume range from 0 to 1. Values greater than 1 will amplify the audio. ";
+  } else if (from_item_type == "coloran") {
+    result = '(color, amplitude) of the constructed noise. \
+            color: Which color noise is applied to the audio. Supported Values are ["white", "pink", "brown", "blue", "violet", "grey", "brown", "violet"]. \
+            amplitude: Specify the amplitude (0.0 - 1.0) of the generated audio stream. Default value is 1.0.';
+  } else if (from_item_type == "background") {
+    result = '(filename, volume) of background noise. Filename is the name of background noise file. Supported Values are ["random", "metro", "office", "park", "restaurant", "traffic", "white", "music_soothing", "music_tense", "song_gentle", "song_rock"]. \
+            If filename is "random", a random background noise will be selected. Volume is a float number greater than 0. \
+            Background noise is applied to the specified time range. Currently, the background noise is not looped. Thus if the noise is shorter, it will not cover the whole time range. A random part of the noise will be selected if the noise file is longer.\
+            Most noise files are about 5 minutes long, except for the music and songs which are about 3 minutes long.';
+  } else if (from_item_type == "sudden") {
+    result = '(filename, volume) of sudden noise. Filename is the name of sudden noise file. Supported Values are ["random", "beep", "glass", "thunder", "dog"]. \
+            If filename is "random", a random background noise will be selected. Volume is a float number greater than 0. \
+            Sudden noise is applied at the specified timestamp. It will not be looped and the end time is ignored. ';
+  } else if (from_item_type == "reverb") {
+    result = '(filename, length) of IR files. Reverb is done by applying Frequency Impulse Response filter. Filename is the name of IR file. Supported Values are ["hall", "room"]. \
+            Length is the Impulse Response filter length range from 0 to 1. A value of 1 means whole IR is processed. Note that the length value does not equal to the strength of reverb. It depends on the waveform of the IR file, which is usually non-linear.\
+            The Reverb effect is applied to the whole audio, thus the start and end time is ignored. ';
+  } else if (from_item_type == "avgblur") {
+    result = '(SizeX, SizeY) of the avgBlur filter. \
+        SizeX, SizeY: Set horizontal and vertical radius size.';
+  } else if (from_item_type == "gblur") {
+    result = 'Sigma of Gaussian blur. ';
+  } else if (from_item_type == "impulse_value") {
+    result = 'Impulse valued noise (salt and pepper noise): \
+        Noise strength for specific pixel component。 ';
+  } else if (from_item_type == "occlusion") {
+    result = '(x, y, w, h) of occlusion box. If mode is "percent", values are given as percentage of video size. Otherwise, they are given as pixels.';
+  } else if (from_item_type == "color") {
+    result = '(contrast, brightness, saturation, gamma_r, gamma_g, gamma_b) of color filter. \
+            contrast: [-2.0, 2.0]. FFmpeg default: 1.0\
+            brightness: [-1.0, 1.0]. FFmpeg default: 0.0\
+            saturation: [0.0, 3.0]. FFmpeg default: 1.0\
+            gamma_r: [0.1, 10.0]. FFmpeg default: 1.0\
+            gamma_g: [0.1, 10.0]. FFmpeg default: 1.0\
+            gamma_b: [0.1, 10.0]. FFmpeg default: 1.0';
+  } else if (from_item_type == "color_channel_swapping") {
+    result = '(channel_1, channel_2) of two channels to be swapped. Supported values are ["r", "g", "b"].\
+            Currently only support swapping two channels.';
+  } else if (from_item_type == "color_channel_swapping") {
+    result = '(channel_1, channel_2) of two channels to be swapped. Supported values are ["r", "g", "b"].\
+            Currently only support swapping two channels.';
+  }
+  return result
+}
 const echartsDataChange = (methodDetailValue) => {
   if (methodDetailValue == "F1amplitude") {
     return "F1amplitude: Ratio of the energy of the spectral harmonic peak at the first formant's centre frequency to the energy of the spectral peak at F0.";
@@ -282,6 +332,7 @@ const getVideoDuration = videoFile =>
   new Promise((resolve, reject) => {
     try {
       const url = URL.createObjectURL(videoFile);
+      // const url = videoFile;
       const tempAudio = new Audio(url);
       tempAudio.addEventListener("loadedmetadata", () => {
         resolve(tempAudio.duration * 1000000);
@@ -330,5 +381,6 @@ export default {
   echartsDataChange,
   getVideoDuration,
   waveOver,
-  uploadFile
+  uploadFile,
+  noiseTip
 };
