@@ -14,8 +14,7 @@ from transformers import BertTokenizerFast
 
 from config import *
 from utils import *
-from model_api.trains import MMIN_MODEL
-from model_api.run import AMIO_MODEL
+from model_api.run import AMIO_MODEL,MMIN_MODEL
 
 os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -30,7 +29,6 @@ app.config['tfr_net'] = AMIO_MODEL('tfr_net')
 CORS(app, supports_credentials=True)
 
 logger = logging.getLogger()
-
 
 @app.route('/test')
 def test():

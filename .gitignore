@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 noise_api/logs/OpenVNA.log
+
+demo/logs/OpenVNA.log

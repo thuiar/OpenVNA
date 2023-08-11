@@ -1,12 +1,14 @@
 from pathlib import Path
 
 WEB_SERVER_PORT = 4096
-LOG_FILE_PATH = Path("logs/Robust-MSA.log")
+LOG_FILE_PATH = Path("logs/OpenVNA.log")
 MEDIA_PATH = Path("media")
 MEDIA_SERVER_PORT = 8192
 # DEVICE = torch.device("cuda")
 DEVICE = "cuda"
 CUDA_VISIBLE_DEVICES = "0"
+
+MODEL_PATH = "/home/sharing/disk1/zhangbaozheng/encoder/emnlp"
 
 # custom status codes
 ERROR_CODE = 400
