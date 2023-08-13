@@ -1,0 +1,8 @@
+{
+    "text": {
+      "model": "bert",
+      "device": "cuda:0",
+      "pretrained": "bert-base-uncased",
+      "args": {}
+    }
+  }

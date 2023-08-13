@@ -1,0 +1,29 @@
+{
+    "video": {
+      "tool": "openface",
+      "fps": 10,
+      "multiFace": {
+        "enable": false,
+        "device": "cuda:0",
+        "facedetScale": 0.25,
+        "minTrack": 10,
+        "numFailedDet": 10,
+        "minFaceSize": 1,
+        "cropScale": 0.4
+      },
+      "average_over": 1,
+      "args": {
+        "hogalign": false,
+        "simalign": false,
+        "nobadaligned": false,
+        "landmark_2D": true,
+        "landmark_3D": false,
+        "pdmparams": false,
+        "head_pose": false,
+        "action_units": true,
+        "gaze": false,
+        "tracked": false
+      }
+    }
+  }
+  
