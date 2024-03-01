@@ -13,16 +13,7 @@ class BertTextEncoder(nn.Module):
     
     def get_tokenizer(self):
         return self.tokenizer
-    
-    # def from_text(self, text):
-    #     """
-    #     text: raw data
-    #     """
-    #     input_ids = self.get_id(text)
-    #     with torch.no_grad():
-    #         last_hidden_states = self.model(input_ids)[0]  # Models outputs are now tuples
-    #     return last_hidden_states.squeeze()
-    
+
     def forward(self, text):
         """
         text: (batch_size, 3, seq_len)

@@ -1,7 +1,7 @@
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch.nn import Parameter
-import torch.nn.functional as F
 
 # Code adapted from the fairseq repo.
 
@@ -81,7 +81,7 @@ class MultiheadAttention(nn.Module):
             q = self.in_proj_q(query)
             k = self.in_proj_k(key)
             v = self.in_proj_v(value)
-        q = self.scaling * q
+        q = q * self.scaling
 
         if self.bias_k is not None:
             assert self.bias_v is not None

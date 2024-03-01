@@ -1,0 +1,8 @@
+{
+    "text": {
+      "model": "bert",
+      "device": "cuda:0",
+      "pretrained": "/home/zhangbaozheng/paper_code/Robust_Framework/pretrained_model/bert_en",
+      "args": {}
+    }
+  }
