@@ -5,26 +5,22 @@ import os
 import random
 import shutil
 from pathlib import Path
-from model_api.utils.real_noise import real_noise
+from model_api.util.real_noise import real_noise
 # import transformers
 from flask import Flask, request
 from flask_cors import CORS
 from MSA_FET import FeatureExtractionTool, get_default_config
 from transformers import BertTokenizerFast
-
+from model_api.run import ModelApi
 from config import *
 from utils import *
-from model_api.run import AMIO_MODEL,MMIN_MODEL
 
-os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 app = Flask(__name__)
 app.config.from_object(APP_SETTINGS)
-app.config['mmin'] = MMIN_MODEL()
-app.config['tpfn'] = AMIO_MODEL('tpfn')
-app.config['t2fn'] = AMIO_MODEL('t2fn')
-app.config['tfr_net'] = AMIO_MODEL('tfr_net')
+
+app.config['model'] = ModelApi()
 
 CORS(app, supports_credentials=True)
 
@@ -34,7 +30,6 @@ logger = logging.getLogger()
 def test():
     logger.info("API called: /test")
     return {"code": SUCCESS_CODE, "msg": "success"}
-
 
 @app.route('/uploadVideo', methods=['POST'])
 def upload_video():
@@ -80,7 +75,6 @@ def call_ASR():
         return {"code": ERROR_CODE, "msg": str(e)}
     return {"code": SUCCESS_CODE, "msg": "success", "result": transcript}
 
-
 @app.route('/uploadTranscript', methods=['POST'])
 def upload_transcript():
     logger.info("API called: /uploadTranscript")
@@ -94,7 +88,7 @@ def upload_transcript():
         annotated_video_path = MEDIA_PATH / video_id / "annotated_video.mp4"
         with open(text_save_path, 'w') as f:
             f.write(transcript)
-        # do alignment
+        # do alignment 
         logger.info(f"Running alignment for {video_id}...")
         # aligned_results = do_alignment(audio_save_path, transcript, WAV2VEC_PROCESSER, WAV2VEC_TOKENIZER, WAV2VEC_MODEL)
         aligned_results = do_alignment(audio_save_path, transcript)
@@ -178,9 +172,6 @@ def edit_video_aligned():
             # do ASR
             logger.info(f"Running ASR for {video_id}...")
             transcript = do_asr(audio_save_path)
-            text_save_path = MEDIA_PATH / video_id / "transcript.txt"
-            with open(text_save_path, 'w') as f:
-                f.write(transcript)
 
             # do alignment
             logger.info(f"Running alignment for {video_id}...")
@@ -222,10 +213,10 @@ def run_msa_aligned():
         feat_defended_path = MEDIA_PATH / video_id / "feat_defended.pkl"
         trans_original_path = MEDIA_PATH / video_id / "transcript.txt"
         trans_modified_path = MEDIA_PATH / video_id / "transcript_modified.txt"
-        weights_root_path = Path(__file__).parent / "assets" / "weights"
         # init
         cfg = get_default_config('aligned')
         cfg['text']['device'] = DEVICE
+        cfg['text']['pretrained'] = PRETRAINED_MODEL
         cfg['align']['device'] = DEVICE
         cfg['video']['fps'] = 30
         cfg['video']['args'] = {
@@ -240,8 +231,9 @@ def run_msa_aligned():
             "gaze": False,
             "tracked": False
         }
+        cfg['align']['args']['model_name'] = WAV2VEC_MODEL_NAME
         fet = FeatureExtractionTool(cfg, verbose=0)
-        bert_tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
+        bert_tokenizer = BertTokenizerFast.from_pretrained(PRETRAINED_MODEL)
         # data defence
         logger.info(f"Data-Level Defence for {video_id}...")
         data_defended = data_defence(video_id, defence)
@@ -401,10 +393,10 @@ def run_msa_aligned():
         if data_defended or feature_defended:
             res["defended"] = {}
 
-        audio_fet = FeatureExtractionTool(config="model_api/config/opensmile.json")
-        vision_fet = FeatureExtractionTool(config="model_api/config/openface.json")
+        audio_fet = FeatureExtractionTool(config="model_api/configs/extraction/opensmile.json")
+        vision_fet = FeatureExtractionTool(config="model_api/configs/extraction/openface.json")
 
-        with open(feat_defended_path, "rb") as f:
+        with open(feat_original_path, "rb") as f:
             original_bert = pickle.load(f)
         original_feature = {
             "text": original_bert['text'],
@@ -414,7 +406,7 @@ def run_msa_aligned():
         }
         original_feature = pad_or_truncate(original_feature)
 
-        with open(feat_defended_path, "rb") as f:
+        with open(feat_modified_path, "rb") as f:
             modified_bert = pickle.load(f)
         modified_feature = {
             "text": modified_bert['text'],
@@ -434,22 +426,24 @@ def run_msa_aligned():
                 "vision": (vision_fet.run_single(video_defended_path))['vision']
             }
             defended_feature = pad_or_truncate(defended_feature)
-
-        for m in models:
-            if data_defended or feature_defended:
-                for key in original_feature:
-                    original_feature[key] = np.concatenate((original_feature[key], modified_feature[key], defended_feature[key]), axis=0)
-                r = app.config[str.lower(m)].eval(original_feature)
-                res["original"][m] = float(r[0])
-                res["modified"][m] = float(r[1])
-                res["defended"][m] = float(r[2])
-            else:
-                for key in original_feature:
-                    original_feature[key] = np.concatenate((original_feature[key], modified_feature[key]), axis=0)
-                r = app.config[str.lower(m)].eval(original_feature)
-                res["original"][m] = float(r[0])
-                res["modified"][m] = float(r[1])
-
+        
+        feature = dict()
+        if data_defended or feature_defended:
+            for key in original_feature:
+                feature[key] = np.concatenate((original_feature[key], modified_feature[key], defended_feature[key]), axis=0)
+        else:
+            for key in original_feature:
+                    feature[key] = np.concatenate((original_feature[key], modified_feature[key]), axis=0)
+        
+        feature = toTorch(feature,(app.config['model']).t2fn_config.device)
+        with torch.no_grad():
+            for m in models:
+                r = getattr(app.config['model'],f'run_{str.lower(m)}')(feature)
+                res["original"][m] = float(r[0][0])
+                res["modified"][m] = float(r[1][0])
+                if len(r) == 3:
+                    res["defended"][m] = float(r[2][0])
+        
     except Exception as e:
         logger.exception(e)
         return {"code": ERROR_CODE, "msg": str(e)}

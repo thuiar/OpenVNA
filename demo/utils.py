@@ -11,7 +11,6 @@ from shutil import rmtree
 import librosa
 import numpy as np
 import torch
-from MMSA import get_config_regression
 from transformers import (BertTokenizerFast, Wav2Vec2ForCTC, Wav2Vec2Processor,
                           Wav2Vec2CTCTokenizer)
 from ctc_segmentation import (
@@ -217,7 +216,8 @@ def data_defence(video_id: str, defence_methods: list[str]) -> bool:
             defended = True
         elif method == "v_reconstruct":
             logger.info("Video MCI...")
-            cmd = f"ffmpeg -i {defended_video_path} -vf blackframe=0,metadata=select:key=lavfi.blackframe.pblack:value=90:function=less,minterpolate=mi_mode=mci -c:a copy -y {defended_video_tmp}"
+            # cmd = f"ffmpeg -i {defended_video_path} -vf blackframe=0,metadata=select:key=lavfi.blackframe.pblack:value=90:function=less,minterpolate=mi_mode=mci -c:a copy -y {defended_video_tmp}"
+            cmd = f'ffmpeg -i {defended_video_path} -vf blackdetect=d=0.1:pic_th=0.90:pix_th=0.10 -c:a copy -y {defended_video_tmp}'
             execute_cmd(cmd)
             shutil.copyfile(defended_video_tmp, defended_video_path)
             defended_video_tmp.unlink()
@@ -290,6 +290,14 @@ def get_word_ids(text_file : str, tokenizer : BertTokenizerFast) -> list[int]:
     text = open(text_file, "r").read()
     encoding = tokenizer(text.split(), is_split_into_words=True)
     return encoding.word_ids()
+
+def toTorch(feature, device):
+    feature['vision'] = (torch.from_numpy(feature['vision'])).to(device)
+    feature['audio'] = (torch.from_numpy(feature['audio'])).to(device)
+    feature['text_bert'] = (torch.from_numpy(feature['text_bert'])).to(device)
+    feature['vision_lengths'] =(torch.from_numpy(feature['vision_lengths'])).to(device)
+    feature['audio_lengths'] = (torch.from_numpy(feature['audio_lengths'])).to(device)
+    return feature
 
 def pad_or_truncate(data : dict, text_len : int = 50, audio_len : int = 1432, vision_len : int = 143) -> dict:
     data['audio_lengths'] = data['audio'].shape[0]

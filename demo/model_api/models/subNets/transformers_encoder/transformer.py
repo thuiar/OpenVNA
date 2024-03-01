@@ -1,9 +1,12 @@
-import torch
-from torch import nn
-import torch.nn.functional as F
-from model_api.models.subNets.transformers_encoder.position_embedding import SinusoidalPositionalEmbedding
-from model_api.models.subNets.transformers_encoder.multihead_attention import MultiheadAttention
 import math
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+from .multihead_attention import MultiheadAttention
+from .position_embedding import SinusoidalPositionalEmbedding
+
 
 class TransformerEncoder(nn.Module):
     """
@@ -28,7 +31,7 @@ class TransformerEncoder(nn.Module):
         self.embed_scale = math.sqrt(embed_dim)
         if position_embedding:
             self.embed_positions = SinusoidalPositionalEmbedding(embed_dim)
-        else: 
+        else:
             self.embed_positions = None
         
         self.attn_mask = attn_mask
