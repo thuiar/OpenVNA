@@ -1,4 +1,4 @@
-# OpenVNA: An Open-source Framework for Video Noise Analysis.
+# OpenVNA: A Framework for Analyzing the Behavior of Multimodal Language Understanding System under Noisy Scenarios
 
 [![](https://badgen.net/badge/license/GPL-3.0/green)](#License) 
 [![](https://badgen.net/pypi/v/MMSA-FET)](https://pypi.org/project/MMSA-FET/) 
