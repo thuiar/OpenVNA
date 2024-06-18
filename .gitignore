@@ -162,3 +162,6 @@ cython_debug/
 noise_api/logs/OpenVNA.log
 
 demo/logs/OpenVNA.log
+node_modules
+demo/media
+demo/model_test.py

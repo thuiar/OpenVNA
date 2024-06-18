@@ -224,9 +224,7 @@
             </el-select>
           </el-form-item>
           <el-form-item
-            v-if="
-              v_form_item.type == 'impulse_value' || v_form_item.type == 'gblur'
-            "
+            v-if="v_form_item.type == 'gblur'"
           >
             <template #label>
               <span>Option</span>
@@ -246,7 +244,34 @@
               </el-tooltip>
             </template>
             <el-input
-              v-model="v_form_item.option.value"
+              v-model="v_form_item.option.gblur"
+              placeholder="> 0"
+              type="text"
+              class="oneInput"
+            />
+          </el-form-item>
+          <el-form-item
+            v-if="v_form_item.type == 'impulse_value'"
+          >
+            <template #label>
+              <span>Option</span>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="right-start"
+              >
+                <template #content>
+                  <div class="boxItemTip">
+                    {{ boxItemTip }}
+                  </div>
+                </template>
+                <el-icon class="questionFilled">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
+            <el-input
+              v-model="v_form_item.option.impulse_value"
               placeholder="> 0"
               type="text"
               class="oneInput"
@@ -591,6 +616,7 @@ const addNoiseItem = () => {
       v_form_item.value.type == "gblur" ||
       v_form_item.value.type == "impulse_value"
     ) {
+      console.log(nosieItem)
       if (nosieItem[3] == "") {
         ElMessage({
           message: "The option cannot be empty.",

@@ -48,7 +48,7 @@
   </div>
 </template>
     
-  <script setup>
+<script setup>
 import { ref } from "vue";
 const currentFile = ref("");
 const upload = ref("");

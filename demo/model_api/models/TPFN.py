@@ -102,19 +102,19 @@ class SubNet(nn.Module):
         return all_y
 
 
-# Extend the feature Z to Z_e for every time step
 def time_extend(x, device, time_window=2):
     batch_size = x[0].data.shape[0]
     time_step = x[0].data.shape[1]
-    ones = Variable(torch.ones(batch_size, 1).to(device), requires_grad=False)  # (B, 1)
+    ones = torch.ones(batch_size, 1, device=device, requires_grad=False)
     for i in range(time_step):
         y_i = ones
         for j in range(time_window):
             for xt in x:
-                try: y_i = torch.cat((y_i, xt[:, i + j, :]), 1)
-                except: y_i = torch.cat((y_i, xt[:, i + j - time_step, :]), 1)
+                if i + j < time_step:
+                    y_i = torch.cat((y_i, xt[:, i + j, :]), 1)
+                else:
+                    y_i = torch.cat((y_i, xt[:, i + j - time_step, :]), 1)
         y_i = y_i.view(batch_size, 1, -1)
-        try: y = torch.cat((y, y_i), 1)
-        except: y = y_i
+        if i == 0: y = y_i
+        else: y = torch.cat((y, y_i), 1)
     return y
-
